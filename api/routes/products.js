@@ -3,21 +3,22 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const Product = require("../models/product");
 
-router.get('/' , (req ,res ,next)=>{
-  res.status(200).json({
-    message : "GET all products"
+router.get('/', (req, res, next) => {
+  Product.find()
+  .exec()
+  .then(result => {
+    res.status('200').json({
+      data : result
+    });
+  })
+  .catch(err => {
+    res.status('500').json({
+      error : err
+    })
   });
 });
 
-router.post('/' , (req ,res ,next) =>{
-  // const product = {
-  //   name: req.body.name,
-  //   price: req.body.price
-  // };
-  // res.status(201).json({
-  //   message : "Post request to product" ,
-  //   createProduct : product
-  // });
+router.post('/', (req, res, next) => {
 
   const product = new Product({
     _id: new mongoose.Types.ObjectId(),
@@ -26,45 +27,67 @@ router.post('/' , (req ,res ,next) =>{
   });
 
   product.save()
+    .then(result => {
+      res.status(201).json({
+        message: "Handle POST requests for new product",
+        createProduct: result
+      });
+    })
+    .catch(err => {
+      console.log(err)
+    });
+});
+
+router.get('/:productId', (req, res, next) => {
+  id = req.params.productId
+  Product.findById({
+      _id: id
+    })
+    .exec()
+    .then(result => {
+      res.status('200').json({
+        data : result
+      });
+    })
+    .catch(err => {
+      res.status('500').json({
+        error : err
+      })
+    });
+});
+
+router.patch('/:productId', (req, res, next) => {
+  id = req.params.productId
+  newName = req.body.name;
+  newPrice = req.body.price;
+  Product.update({_id:id} , {$set:{name:newName , price:newPrice}})
+  .exec()
   .then(result => {
-    res.status(201).json({
-      message : "POST new product",
-      createProduct : product
+    res.status('200').json({
+      data : result
+    })
+  })
+  .catch(err => {
+    res.status('500').json({
+      error : err
+    });
+  });
+});
+
+router.delete('/:productId', (req, res, next) => {
+  id = req.params.productId;
+  Product.remove({_id : id})
+  .exec()
+  .then(result => {
+    res.status('200').json({
+      data : "this item is removed successfully"
     });
   })
   .catch(err => {
-    console.log(err)
+    res.status('500').json({
+      error : err
+    });
   });
-
-});
-
-router.get('/:productId' , (req ,res ,next)=>{
-  id = req.params.productId
-  if(id === 'special'){
-    res.status(200).json({
-      message : "Valid to access product",
-      id : id
-    });
-  }
-  else{
-    res.status(200).json({
-      message : "Not Valid to access product",
-    });
-  }
-});
-
-router.patch('/:productId' , (req ,res ,next)=>{
-  id = req.params.productId
-    res.status(200).json({
-      message : "Patch product",
-    });
-});
-
-router.delete('/:productId' , (req ,res ,next)=>{
-  id = req.params.productId
-    res.status(200).json({
-      message : "delete product",
-    });
 });
 
 module.exports = router;
