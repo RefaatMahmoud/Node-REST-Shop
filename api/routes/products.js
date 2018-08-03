@@ -77,7 +77,7 @@ router.get('/:productId', (req, res, next) => {
           price: doc.price
         }
       }
-      res.status('201').json(response)
+      res.status('200').json(response)
     })
     .catch(err => {
       res.status('404').json({
@@ -90,6 +90,17 @@ router.patch('/:productId', (req, res, next) => {
   id = req.params.productId
   newName = req.body.name;
   newPrice = req.body.price;
+  //Validation in Update Request
+  if (!newName) {
+    res.status('404').json({
+      error: "name is required"
+    });
+  }
+  if (!newPrice) {
+    res.status('404').json({
+      error: "price not found"
+    });
+  }
   Product.update({
       _id: id
     }, {
